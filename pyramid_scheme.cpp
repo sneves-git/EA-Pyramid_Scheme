@@ -1,44 +1,75 @@
+/*
+    Problema 2
+     Sofia Neves - 2019220082
+     Tatiana Almeida - 2019219581
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 
-vector<int> vector_, cost, marker;
-vector<pair<int, vector<int>>> connections;
-
 string input;
 stringstream ss;
+vector<int> vector_;
 
-void pyramid_scheme(int node)
+struct Node
 {
-    if (connections[node].second.size() == 0)
+    int id, cost,
+        used_node, used_money,
+        unused_node, unused_money;
+
+    vector<int> child;
+};
+vector<Node> nodes;
+
+void pyramid_scheme(int id)
+{
+    // I'm a LEAF
+    if (nodes[id].child.size() == 0)
     {
-        if (marker[connections[node].first] == 0)
-        {
-            marker[node] = 1;
-        }
+        nodes[id].used_node = 1;
+        nodes[id].used_money = nodes[id].cost;
+        nodes[id].unused_node = 0;
+        nodes[id].unused_money = 0;
         return;
     }
 
-    if (marker[connections[node].first] == 0)
+    for (long unsigned int i = 0; i < nodes[id].child.size(); ++i)
     {
-        marker[node] = 1;
-        for (unsigned long int i = 0; i < connections[node].second.size(); ++i)
-        {
-            pyramid_scheme(connections[node].second[i]);
-        }
-        marker[node] = 0;
+        pyramid_scheme(nodes[id].child[i]);
     }
-    else
-    {
-        marker[node] = 1;
-        for (unsigned long int i = 0; i < connections[node].second.size(); ++i)
-        {
-            pyramid_scheme(connections[node].second[i]);
-        }
 
-        marker[node] = 0;
-        for (unsigned long int i = 0; i < connections[node].second.size(); ++i)
+    nodes[id].used_node = 1;
+    nodes[id].used_money = nodes[id].cost;
+    for (long unsigned int i = 0; i < nodes[id].child.size(); ++i)
+    {
+        nodes[id].unused_node += nodes[nodes[id].child[i]].used_node;
+        nodes[id].unused_money += nodes[nodes[id].child[i]].used_money;
+
+        // USE MY SON IS BETTER
+        if (nodes[nodes[id].child[i]].used_node < nodes[nodes[id].child[i]].unused_node)
         {
-            pyramid_scheme(connections[node].second[i]);
+            nodes[id].used_node += nodes[nodes[id].child[i]].used_node;
+            nodes[id].used_money += nodes[nodes[id].child[i]].used_money;
+        }
+        // NOT USE MY SON IS BETTER
+        else if (nodes[nodes[id].child[i]].used_node > nodes[nodes[id].child[i]].unused_node)
+        {
+            nodes[id].used_node += nodes[nodes[id].child[i]].unused_node;
+            nodes[id].used_money += nodes[nodes[id].child[i]].unused_money;
+        }
+        // THE SAME NUMBER OF NODES COUNTER
+        else
+        {
+            if (nodes[nodes[id].child[i]].used_money > nodes[nodes[id].child[i]].unused_money)
+            {
+                nodes[id].used_node += nodes[nodes[id].child[i]].used_node;
+                nodes[id].used_money += nodes[nodes[id].child[i]].used_money;
+            }
+            else
+            {
+                nodes[id].used_node += nodes[nodes[id].child[i]].unused_node;
+                nodes[id].used_money += nodes[nodes[id].child[i]].unused_money;
+            }
         }
     }
 }
@@ -47,24 +78,21 @@ int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(0);
-    connections = vector<pair<int, vector<int>>>(100001, make_pair(-1, vector<int>()));
-    cost = vector<int>(100001, 0);
-    marker = vector<int>(100001, 0);
+
+    nodes = vector<Node>(100001, {.id = -1, .cost = -1, .used_node = 0, .used_money = 0, .unused_node = 0, .unused_money = 0, .child = vector<int>()});
 
     string line;
-    int number, num, best = 0;
+    int number, num;
     while (getline(cin, line))
     {
         stringstream X(line);
 
         X >> num;
 
-        if (num > best)
-        {
-            best = num;
-        }
-        vector_ = vector<int>();
+        Node node;
+        node.id = num;
 
+        vector_ = vector<int>();
         if (num != -1)
         {
             for (int i = 0; X >> number; ++i)
@@ -77,46 +105,38 @@ int main()
 
                 if (i == vector_.size() - 1)
                 {
-                    cost[num] = vector_[vector_.size() - 1];
-                    if (i == 0)
-                    {
-                        connections[vector_[i]].first = num;
-                    }
+                    node.cost = vector_[vector_.size() - 1];
                 }
                 else
                 {
-                    connections[vector_[i]].first = num;
-                    (connections[num].second).push_back(vector_[i]);
+                    node.child.push_back(vector_[i]);
                 }
             }
+            nodes[num] = node;
         }
         else
         {
-            /*
-            cout << "best: " << best << endl;
-            // print connections
-            for (int i = 0; i < best + 1; ++i)
+            pyramid_scheme(0);
+
+            if (nodes[0].used_node < nodes[0].unused_node)
             {
-                for (unsigned long int j = 0; j < connections[i].second.size(); ++j)
+                cout << nodes[0].used_node << " " << nodes[0].used_money << endl;
+            }
+            else if (nodes[0].used_node > nodes[0].unused_node)
+            {
+                cout << nodes[0].unused_node << " " << nodes[0].unused_money << endl;
+            }
+            else
+            {
+                if (nodes[0].used_money > nodes[0].unused_money)
                 {
-                    cout << "connections[" << i << "][" << j << "] = FIRST: " << connections[i].first << "\tSECOND: " << connections[i].second[j] << " ";
+                    cout << nodes[0].used_node << " " << nodes[0].used_money << endl;
                 }
-                cout << endl;
+                else
+                {
+                    cout << nodes[0].unused_node << " " << nodes[0].unused_money << endl;
+                }
             }
-
-            cout << "---------";
-            // print cost
-            for (int i = 0; i < best + 1; ++i)
-            {
-                cout << "i: " << i << " cost:" << cost[i] << " " << endl;
-            }
-
-            cost = vector<int>();*/
-
-            connections = vector<pair<int, vector<int>>>(100001, make_pair(-1, vector<int>()));
-            cost = vector<int>(100001, 0);
-            best = 0;
-            marker = vector<int>(100001, 0);
         }
     }
     return 0;
