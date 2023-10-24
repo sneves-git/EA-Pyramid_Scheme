@@ -17,7 +17,7 @@ The id of the first member (in the top of tree) is always 0. The remaining ids r
 ### Output
 The goal is to find the least number of members to investigate that confirm all the recruitments as well as to report the total amount of money paid by them when they were recruited. In case there are several possibilities of forming such a group, consider those that maximize the total amount of money paid and report this value. For each test case, print these two values in a single line.
 
-In the figure above, the solution is given by members 1, 2, and 3, with total value 91. Note that the solution given my members 1, 6, and 3 has value 116 but it is not valid since it is not possible to confirm that member 0 recruited member 2 (or that member 2 was recruited by member 0).
+In the figure above, the solution is given by members 1, 2, and 3, with total value 91. Note that the solution given my members 1, 6, and 3 has value 116 but it is not valid since it is not possible to confirm that member 0 recruited member 2 (or that member 2 was recruited by member 0)
 ##
 ### Example
 #### Example input:
